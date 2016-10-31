@@ -1,0 +1,212 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="doom-repeat">
+	<template>
+		<style>
+			ul {
+				padding: 10px;
+				border: 1px solid #F0F0F0;
+			}
+			
+			li {
+				display: flex;
+				padding: 2px;
+			}
+			
+			li div {
+				display: flex;
+				text-align: center;
+			}
+			
+			.w50 {
+				width: 50px;
+			}
+			
+			.w200 {
+				width: 200px;
+			}
+			
+			.w100 {
+				width: 100px;
+			}
+			
+			button: {
+				margin-left: 20px;
+			}
+			
+			div.tasks {
+				margin-left: 10px;
+			}
+			div.tasks span::before {
+				content:'*'
+			}
+		</style>
+		<div>
+			Number Employees: [[employees.length]]
+			<button on-tap="_addEmployee">Add</button>
+		</div>
+
+		<ul>
+			<template id="drEmployees" is="dom-repeat" items="[[employees]]" as="employee">
+				<li>
+					<div class="w200">[[employee.name]]</div>
+					<button on-tap="_ageOnTap">Age: [[employee.age]]</button>
+					<div class="tasks">Tasks:
+						<template id="drTasks" is="dom-repeat" items="{{employee.tasks}}" as="task">
+							&nbsp;<span>[[task.name]]</span>
+						</template>
+					</div>
+				</li>
+			</template>
+		</ul>
+		<p>
+			<div>Why this render method doesn't work?</div>
+			<button on-tap="_renderDREmployees">Manual Dom-Repeat Render</button>
+		</p>
+		<p>
+			<div>Make Change outside the dom-repeat</div>
+			<select class="w200" value="{{selectedEmployeeIndex::change}}">
+        <option value="">Please Select An Employee</option>
+        <template is="dom-repeat" items="{{employees}}" as="employee" index-as="eid">
+          <option value='{{eid}}'>{{employee.name}}</option>
+        </template>
+      </select>
+			<template is="dom-if" if="{{selectedEmployeeIndex}}">
+				<button on-tap="_changeEmployeeName">Change Name</button>
+				<button on-tap="_changeEmployeeAge">Change Age</button>
+				<button on-tap="_addTask">Add Task</button>
+			</template>
+		</p>
+		<p>
+			<div>Observe Employees Detail Changed</div>
+			<textarea rows="10" cols="80" disabled>[[__employeesDetailString]]</textarea>
+		</p>
+	</template>
+	<script>
+    (function() {
+      'use strict';
+      Polymer({
+        is: 'doom-repeat',
+        properties: {
+          employees: {
+            type: Array,
+            observer:'_employeesChanged',
+            value: function() { return [{name: "DOOM-REPEAT", age:18, tasks:[{name: "do-nothing"}] }] } // default employee
+          },
+        },
+
+        observers: [
+          '_employeesDetailChanged(employees.*)' // watching the employees detail changed
+        ],
+
+        ready: function() {
+          this.__commonNames = 'James John Robert Michael William David Richard Charles Thomas Paul Donald George Mark Steven Brian Kevin Jason'.split(' ')
+          this.__tasks = 'make-coffee clean-floor buy-lunch call-customer move-desk close-account copy-documents play-game'.split(' ')
+          // add 2 more employees
+          this._addEmployee() 
+          this._addEmployee()
+        },
+
+        _addEmployee: function() {
+          let employee = {
+              name: this._genName(),
+              age: this._random(),
+              tasks: []
+            }
+          // using polymer push not array push here
+          this.push('employees', employee)
+        },
+
+        // called when the employees object reference changed
+        _employeesChanged: function(employees) {
+          console.log('Employees Reference Changed')
+        },
+
+        // called when the employees or its properties are changed changed
+        _employeesDetailChanged: function(detail) {
+          //console.log('Employees List Changed')
+          this.__employeesDetailString = 'Path: '+ detail.path
+             + "\nValue: " + this._toString(detail.value)
+             + "\nBase: " + this._toString(detail.base)
+        },
+
+        // Employee's Age Button inside Dom-Repeat is tapped
+        _ageOnTap: function(e) {
+          var model = e.model;
+          model.set('employee.age', model.employee.age + 1);
+        },
+        
+        // get a random name from the __commonNames list
+        _genName: function() {
+          return this._random(this.__commonNames)
+        },
+      
+        // generate random number between min and max (default: 18 to 60 )
+        // if min is an array, return a random item in that array
+        _random: function(min,max) {
+          if (Array.isArray(min)) {
+            return min[this._random(0, min.length)]
+          }
+          min = min || (min===0)? 0 : 18
+          max = max || 60
+          return Math.floor(Math.random() * (max - min) + min)
+        },
+        
+        // call dom-repeat render
+        _renderDREmployees: function() {
+          // Why this doesn't work ?
+          this.employees[0].name="RENDERED"
+          // calling render
+          this.$.drEmployees.render()
+        },
+        
+        // get selectedEmployeeIndex 
+        _getSelectedEmployeeIndex: function () {
+          try {
+            if ((this.selectedEmployeeIndex!=='') && (this.selectedEmployeeIndex>=0) && (this.employees.length>=1)) {
+              return parseInt(this.selectedEmployeeIndex)%this.employees.length // make sure is not out of index
+            }
+          } catch (e) {}
+          return -1
+        },
+
+        // Change Employee Name
+        _changeEmployeeName: function() {
+          var i=this._getSelectedEmployeeIndex()
+          if (i>=0) {
+            this.employees[i].name = this._genName()
+            this.notifyPath('employees.'+i+'.name')
+          }
+        },
+        
+        // Increase Employee Age
+        _changeEmployeeAge: function() {
+          var i=this._getSelectedEmployeeIndex()
+          if (i>=0) {
+            this.employees[i].age +=1
+            this.notifyPath('employees.'+i+'.age')
+          }
+        },        
+        
+
+        // Add Task to the selected Employee
+        _addTask: function() {
+          var i=this._getSelectedEmployeeIndex()
+          if (i>=0) {
+            var employee = this.employees[i]
+            // this.employees[i].tasks.push({name: this._random(this.__tasks)})
+            // console.log(this.employees[i].tasks.map(function(t) { return t.name}).join(','))
+            this.push('employees.'+i+'.tasks', {name: this._random(this.__tasks)})
+            // not working!!!
+            this.notifyPath('employees.'+i+'.tasks.*')
+          }
+        },
+
+        // stringify an object
+        _toString: function(object) {
+          return (typeof object === 'object') ? JSON.stringify(object) : object.toString()
+        }
+      });
+    })();
+  </script>
+</dom-module>
