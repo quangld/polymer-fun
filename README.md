@@ -2,7 +2,7 @@
 
 A collections of custom elements and my play-ground while learning how to use polymer  
 
-### <doom-repeat>
+### \<doom-repeat\>
 
 An example of nested dom-repeat: one way to re-render dom-repeat when item sub-properties changed
 
