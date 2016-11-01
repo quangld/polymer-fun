@@ -1,0 +1,43 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<dom-module id="element-menu">
+	<template>
+		<style>
+			:host {
+				display: block;
+				padding: 0px;
+			}
+		</style>
+		<div>
+			Picked an element:
+			<template is="dom-repeat" items="{{elements}}">
+				<paper-button raised on-tap="_elementOnTap">{{item}}</paper-button>
+			</template>
+		</div>
+		<hr>
+    <div id="element">
+      Please select an element
+    </div>
+	</template>
+	<script>
+    Polymer({
+      is: 'element-menu',
+      ready: function() {
+        var self = this;
+        this.elements = 'doom-repeat doom-repeat-splitted'.split(' ')
+        this.elements.forEach(function(element) {
+          self.importHref('/elements/'+element+'.html')
+        })
+        console.log()
+      },
+
+      _elementOnTap: function (e) {
+        var dom = Polymer.dom(this.$.element)
+        dom.removeChild(dom.firstChild)
+        dom.appendChild(document.createElement(e.model.item))
+      }
+
+    });
+  </script>
+</dom-module>

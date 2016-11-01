@@ -1,0 +1,58 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<!-- <link rel="import" href="shared-styles.html"> -->
+
+<dom-module id="employee-tasks">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 0px;
+      }
+			div.tasks {
+				margin-left: 10px;
+			}
+			
+			div.tasks span::before {
+				content: '*'
+			
+      }
+      div.tasks span:hover {
+        color:red;
+      }
+    </style>
+
+		<div class="tasks">
+      <b>Tasks:</b>
+		  <template id="drTasks" is="dom-repeat" items="{{tasks}}" as="task">
+		  &nbsp;<span on-tap="_taskOnTap">[[task.name]]</span>
+		  </template>
+		</div>    
+  </template>
+
+  <script>
+    Polymer({
+      is: 'employee-tasks',
+      properties:{
+        tasks: {
+          type: Array,
+          notify: true,
+          value: function() { return [] }
+        }
+      },
+
+      _taskOnTap: function(e) {
+        // delete when task is tapped
+        var model = e.model
+        var index = this.tasks.indexOf(model.task);
+        if (index>=0) {
+          // POSSIBLE TO DO THE DELETION HERE 
+          // this.splice('tasks', index, 1);
+          // this.notifyPath('tasks.*')
+
+          // but let the parent handles this 
+          this.fire('employee-tasks-changed',index)
+        }
+      }
+    });
+  </script>
+</dom-module>

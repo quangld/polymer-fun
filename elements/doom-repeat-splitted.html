@@ -1,6 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="employee-tasks.html">
 
-<dom-module id="doom-repeat">
+<dom-module id="doom-repeat-splitted">
 	<template>
 		<style>
 			ul {
@@ -33,15 +34,9 @@
 			button: {
 				margin-left: 20px;
 			}
-			
-			div.tasks {
-				margin-left: 10px;
-			}
-			div.tasks span::before {
-				content:'*'
-			}
+
 		</style>
-    <h1>Nested Dom-Repeat: One way to re-render them</h1>
+		<h1>Nested Dom-Repeat 2: turn employee tasks to an element</h1>
 		<div>
 			Number Employees: [[employees.length]]
 			<button on-tap="_addEmployee">Add</button>
@@ -52,18 +47,10 @@
 				<li>
 					<div class="w200">[[employee.name]]</div>
 					<button on-tap="_ageOnTap">Age: [[employee.age]]</button>
-					<div class="tasks">Tasks:
-						<template id="drTasks" is="dom-repeat" items="{{employee.tasks}}" as="task">
-							&nbsp;<span>[[task.name]]</span>
-						</template>
-					</div>
+          <employee-tasks tasks="{{employee.tasks}}"></employee-tasks>
 				</li>
 			</template>
 		</ul>
-		<p>
-			<div>Why this render method doesn't work?</div>
-			<button on-tap="_renderDREmployees">Manual Dom-Repeat Render</button>
-		</p>
 		<p>
 			<div>Make Change outside the dom-repeat</div>
 			<select class="w200" value="{{selectedEmployeeIndex::change}}">
@@ -82,15 +69,15 @@
 			<div>Observe Employees Detail Changed</div>
 			<textarea rows="10" cols="80" disabled>[[__employeesDetailString]]</textarea>
 		</p>
-    <p>
-      <a href="https://github.com/quangld/polymer-fun">Github Page</a>
-    </p>
+		<p>
+			<a href="https://github.com/quangld/polymer-fun">Github Page</a>
+		</p>
 	</template>
 	<script>
     (function() {
       'use strict';
       Polymer({
-        is: 'doom-repeat',
+        is: 'doom-repeat-splitted',
         properties: {
           employees: {
             type: Array,
@@ -102,6 +89,10 @@
         observers: [
           '_employeesDetailChanged(employees.*)' // watching the employees detail changed
         ],
+
+        listeners: {
+          'employee-tasks-changed': '_tasksChanged',
+        },
 
         ready: function() {
           this.__commonNames = 'James John Robert Michael William David Richard Charles Thomas Paul Donald George Mark Steven Brian Kevin Jason'.split(' ')
@@ -156,14 +147,6 @@
           return Math.floor(Math.random() * (max - min) + min)
         },
         
-        // call dom-repeat render
-        _renderDREmployees: function() {
-          // Why this doesn't work ?
-          this.employees[0].name="RENDERED"
-          // calling render
-          this.$.drEmployees.render()
-        },
-        
         // get selectedEmployeeIndex 
         _getSelectedEmployeeIndex: function () {
           try {
@@ -198,10 +181,20 @@
           var i=this._getSelectedEmployeeIndex()
           if (i>=0) {
             var employee = this.employees[i]
-            // this.employees[i].tasks.push({name: this._random(this.__tasks)})
-            // console.log(this.employees[i].tasks.map(function(t) { return t.name}).join(','))
+            // using polymer function
             this.push('employees.'+i+'.tasks', {name: this._random(this.__tasks)})
-            // not working!!!
+            // notify changes
+            this.notifyPath('employees.'+i+'.tasks.*')
+          }
+        },
+
+        // employee-tasks-changed event
+        _tasksChanged: function(e) {
+          // get the index of the employee whose tasks got changed
+          var i = this.$.drEmployees.indexForElement(e.target)
+          if (i>=0) {
+            console.log(i)
+            this.splice('employees.'+i+'.tasks', e.detail, 1);
             this.notifyPath('employees.'+i+'.tasks.*')
           }
         },
