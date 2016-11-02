@@ -20,4 +20,4 @@ using custom-element inside dom-repeat: fire an event to notify parent element
 
 [//]: #
 [doom-repeat-plnkr]: <http://plnkr.co/edit/Y0P5vNxg46t5fX7gJFxU?p=preview>
-[doom-repeat-project-page]:<http://quangld.com/polymer-fun/>
+[doom-repeat-project-page]: <http://quangld.com/polymer-fun/>
