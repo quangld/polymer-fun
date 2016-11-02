@@ -7,6 +7,7 @@ A collections of custom elements and my play-ground while learning how to use po
 An example of nested dom-repeat: one way to re-render dom-repeat when item sub-properties changed
 
 [View It][doom-repeat-project-page]
+
 [Test it on Plunker][doom-repeat-plnkr]
 
 ### \<doom-repeat-splitted\>
