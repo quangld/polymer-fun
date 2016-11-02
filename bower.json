@@ -1,19 +1,17 @@
 {
-  "name": "doom-repeat",
-  "description": "To test dom-repeat",
-  "main": "doom-repeat.html",
-  "dependencies": {
-    "polymer": "Polymer/polymer#^1.4.0",
-    "paper-button": "PolymerElements/paper-button#^1.0.14"
-  },
-  "devDependencies": {
-    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
-  },
+  "name": "socket",
+  "description": "Testing Socket.io",
+  "main": "bin/www",
   "authors": [
     "Quang Le <me@quangld.com>"
   ],
-  "license": "MIT",
+  "license": "ISC",
+  "keywords": [
+    "socket.io",
+    "polymer"
+  ],
   "homepage": "",
+  "private": true,
   "ignore": [
     "**/.*",
     "node_modules",

@@ -1,0 +1,24 @@
+{
+  "name": "doom-repeat",
+  "description": "To test dom-repeat",
+  "main": "doom-repeat.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.4.0",
+    "paper-button": "PolymerElements/paper-button#^1.0.14"
+  },
+  "devDependencies": {
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  },
+  "authors": [
+    "Quang Le <me@quangld.com>"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
