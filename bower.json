@@ -1,6 +1,6 @@
 {
-  "name": "socket",
-  "description": "Testing Socket.io",
+  "name": "polymer-fun",
+  "description": "My polymer-fun with node-express back-end",
   "main": "bin/www",
   "authors": [
     "Quang Le <me@quangld.com>"

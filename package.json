@@ -14,9 +14,11 @@
     "morgan": "~1.7.0",
     "serve-favicon": "~2.3.0"
   },
-  "description": "Testing Socket.io",
-  "main": "app.js",
-  "devDependencies": {},
-  "author": "",
+  "description": "My Polymer Playground with Node-Express back-end",
+  "main": "./bin/www",
+  "devDependencies": {
+
+  },
+  "author": "Quang Le <me@quangld.com>",
   "license": "ISC"
 }

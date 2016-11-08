@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>Socket-IO Fun</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="js/socket.io.js"></script>
+</head>
+
+<body>
+	<div style="display:flex; width: 100%;">
+	</div>
+</body>
+<script>
+  function log(channel, data) {
+    console.log('Channel: '+channel)
+    console.log(data)
+  }
+  var host = location.href.substr(0, location.href.indexOf('/',7))+'/'
+  var socket = io(host)
+  var chPrivate = 'private'
+  var chPublic = 'public'
+  socket.on(chPrivate, function (data) {
+    log(chPrivate,data)
+    if (data && data.cmd) {
+      switch(data.cmd) {
+        case 'IDENTIFY':
+          socket.emit(chPrivate, { cmd: 'IDENTITY', name: 'Tom' + Date.now() })
+          break
+        case 'INROOM':
+          log(chPrivate, data.msg)
+          break
+      }
+    }
+  })
+  socket.on(chPublic, function (data) {
+    log(chPublic,data)
+  })
+
+  setTimeout(function() {
+    socket.emit(chPrivate, { cmd: 'JOIN' })
+    socket.emit(chPublic, { msg: 'Hi All' })
+  },1000)
+
+</script>
+</html>

@@ -1,11 +1,11 @@
 {
-  "name": "doom-repeat",
+  "name": "polymer-fun",
   "version": "1.0.0",
-  "description": "To test dom-repeat in polymer",
-  "main": "index.js",
+  "description": "My polymer playground",
+  "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Quang Le <me@quangld.com>",
   "license": "ISC"
 }

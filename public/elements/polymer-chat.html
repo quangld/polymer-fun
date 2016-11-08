@@ -1,0 +1,171 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<!-- <link rel="import" href="shared-styles.html"> -->
+
+<link rel="import" href="polymer-socket.html">
+
+<dom-module id="polymer-chat">
+	<template>
+		<style>
+			:host {
+				display: block;
+				padding: 10px;
+			}
+			
+			paper-card {
+				min-width: 600px;
+			}
+			
+			div.header {
+				padding: 10px;
+				display: flex;
+				justify-content: space-between;
+				border-bottom: 1px solid #e8e8e8;
+				background-color: var(--paper-cyan-500);
+				color: white;
+			}
+			
+			div.card-content {
+				padding: 0px;
+			}
+			
+			div.content {
+				padding: 10px;
+			}
+		</style>
+		<polymer-socket
+      id="socket"
+      name="[[name]]"
+      rooms="{{__rooms}}"
+      private-message="{{__privateMessage}}"
+      server-time="{{__serverTime}}"
+      room-message="{{__roomMessage}}"
+      connected="{{__connected}}"></polymer-socket>
+		<paper-card>
+			<div class="card-content">
+				<div class="header gray">
+					<div class="name">[[name]]</div>
+					<div class="server-time">[[_toTimeString(__serverTime)]]</div>
+				</div>
+				<div class="content">
+					<paper-tabs selected="{{__selectedRoom}}" scrollable>
+						<template is="dom-repeat" items="[[__rooms]]" as="tab">
+							<paper-tab>[[tab.name]]</paper-tab>
+						</template>
+					</paper-tabs>
+					<iron-pages selected="[[__selectedRoom]]">
+						<template is="dom-repeat" items="[[__rooms]]" as="room">
+							<div class="messages">
+								<ul>
+									<template is="dom-repeat" items="[[room.messages]]" as="msg">
+										<li>[[msg.from]]: [[msg.cmd]] [[msg.msg]]</li>
+									</template>
+								</ul </div>
+						</template>
+					</iron-pages>
+					</div>
+				</div>
+				<div class="card-actions">
+					<template is="dom-if" if="[[__connected]]">
+						<label>[[_getChannelName(__selectedRoom)]]</label>
+						<paper-input label="Message" value="{{__inputMessage::change}}"></paper-input>
+					</template>
+				</div>
+		</paper-card>
+	</template>
+	<script>
+    Polymer({
+      is: 'polymer-chat',
+      properties:{
+        name: String,
+        __privateMessage: {
+          type: Object,
+          observer: '_privateMessageChanged'
+        },
+        __inputMessage: {
+          type: Object,
+          observer: '_inputMessageChanged'          
+        },
+        __rooms: {
+          type: Array,
+          value: function() { return [{name: 'Private', messages: [] }] }
+        },
+        __selectedRoom: {
+          type: Number,
+          value: 0
+        },
+        __roomMessage: {
+          type: Object,
+          observer: '_roomMessageChanged'
+        }
+      },
+
+      _toTimeString: function (time) {
+        return (new Date(time)).toLocaleTimeString()
+      },
+
+      _privateMessageChanged: function(data) {
+        if (data) {
+          this.push('__rooms.0.messages',data)
+        }
+      },
+
+      // new text from input
+      _inputMessageChanged: function(msg) {
+        if ((typeof msg=='string') && (msg.length>0)) {
+          if (this.__selectedRoom===0) {
+            this._processPrivateMessage(msg)
+          } else {
+            // console.log(this._getChannelName(this.__selectedRoom))
+            this.$.socket.sendRoomMessage(this._getChannelName(this.__selectedRoom), msg)
+          }
+          this.__inputMessage = ''
+        }
+      },
+
+      //
+      _toString: function (o) {
+        return (typeof o === 'object') ? JSON.stringify(o) : o.toString()
+      },
+
+      // get selected Room name
+      _getChannelName: function(index) {
+        return this.__rooms[index].name
+      },
+
+      // processing command from private Room
+      _processPrivateMessage: function(msg) {
+        if ((!msg) || (msg.length<4)) {
+          return // doing nothing
+        }
+        var msgs = msg.split(' ')
+        var cmd = msgs[0].toUpperCase()
+        switch(cmd) {
+          case 'JOIN': // open or join a Room
+            if ((msgs.length>=2) && (msgs[1].length>=4)) { // Room name must be longer than 4 chars
+              this._sendPrivateMessage(msgs[1], cmd)
+            }
+        }
+      },
+
+      // send a message to private Room
+      _sendPrivateMessage: function (msg, cmd) {
+        this.$.socket.sendPrivateMessage(msg,cmd)
+      },
+
+      _roomMessageChanged: function (data) {
+        console.log(this.__rooms)
+        var roomIndex = this.__rooms.findIndex(function(r) {
+          return r.name === data.room
+        })
+        // console.log('Room Message', roomIndex, data)
+        if (roomIndex>=0) {
+          this.push('__rooms.'+ roomIndex +'.messages',data)
+        }
+      }
+    });
+  </script>
+</dom-module>

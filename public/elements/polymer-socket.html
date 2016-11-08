@@ -1,0 +1,119 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<!-- <link rel="import" href="shared-styles.html"> -->
+<script src="../js/socket.io.js"></script>
+<script>
+  var COM_ROOM = 'PRIVATE'
+  var MSG_IDENTIFY = 'IDENTIFY'
+  var MSG_ID_ACCEPTED = 'ID_ACCEPTED'
+  var MSG_ID_INVALID = 'ID_INVALID'
+  var MSG_STANDARD = 'STANDARD'
+  var ROOM_AUTHORIZED = 'ROOM_AUTHORIZED'
+  var ROOM_NOT_AUTHORIZED = 'ROOM_NOT_AUTHORIZED'
+  var ROOM_MSG = 'ROOM_MSG'
+</script>
+
+<dom-module id="polymer-socket">
+	<template>
+		<style>
+			:host {
+				display: block;
+				padding: 10px;
+			}
+		</style>
+	</template>
+	<script>
+    Polymer({
+      is: 'polymer-socket',
+      properties: {
+        name: String,
+        serverTime: {
+          type: Number,
+          notify: true
+        },
+        rooms: {
+          type: Array,
+          value: function() {
+            return [COM_ROOM]
+          },
+          notify: true
+        },
+        connected: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        privateMessage: {
+          type: Object,
+          notify: true
+        },
+        roomMessage: {
+          type: Object,
+          notify: true
+        },
+        hostAddress: {
+          type: String,
+          value: location.href.substr(0, location.href.indexOf('/',7))+'/'
+        },
+      },
+
+      created: function () {
+        var self = this
+        this.socket = io.connect(this.hostAddress)
+        this.socket.on(COM_ROOM, function (data) {
+          self._onComMessage(data)
+        });
+        this.socket.on(ROOM_MSG, function (data) {
+          self._onRoomMessage(data)
+        });
+        this.socket.on('server-time', function (time) {
+          if (time) {
+            self.serverTime = time
+          }
+        })
+      },
+
+      // getting messages on private room
+      _onComMessage: function(data) {
+        // console.log('Received', data)
+        this.privateMessage = data
+        switch (data.cmd) {
+          case MSG_IDENTIFY:
+            this.sendPrivateMessage(this.name, MSG_IDENTIFY)
+            break
+
+          case MSG_ID_ACCEPTED:
+            this.connected = true
+            break
+
+          case MSG_ID_INVALID:
+            this.connected = false
+            console.log('name is invalid')
+            break
+          
+          case ROOM_AUTHORIZED:
+            this.push('rooms', { name: data.room, messages: [] })
+            break
+
+          default:
+            break
+        }
+      },
+
+      // getting messages on private room
+      _onRoomMessage: function(data) {
+        this.roomMessage = data
+      },
+
+      sendPrivateMessage: function(msg,cmd) {
+        cmd = cmd || MSG_STANDARD
+        this.socket.emit(COM_ROOM,{ cmd: cmd, msg: msg })
+      },
+
+      sendRoomMessage: function (room, msg) {
+        // console.log('Sending Room Message',room, msg)
+        this.socket.emit(COM_ROOM, { cmd: ROOM_MSG, room: room, msg: msg })
+      }
+    });
+  </script>
+</dom-module>
