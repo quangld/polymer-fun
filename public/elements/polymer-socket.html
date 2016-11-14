@@ -26,7 +26,10 @@
     Polymer({
       is: 'polymer-socket',
       properties: {
-        name: String,
+        name: {
+          type: String,
+          value: 'POLYMER' //default name, please change
+        },
         serverTime: {
           type: Number,
           notify: true
